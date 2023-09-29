@@ -38,6 +38,7 @@ namespace RedisProject.September.Concrete
                 result = JsonSerializer.SerializeToUtf8Bytes(action());
                 _cache.StringSet(key, result, ExpireTime);
             }
+            //todo json çeviremiyor ama data redise gitti
             return JsonSerializer.Deserialize<T>(result);
         }
 
