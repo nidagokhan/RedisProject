@@ -1,4 +1,14 @@
+using RedisProject.September.Concrete;
+using RedisProject.September.Interfaces;
+using StackExchange.Redis;
+
 var builder = WebApplication.CreateBuilder(args);
+
+IConfiguration configuration = builder.Configuration;
+var multiplexer = ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis"));
+builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+builder.Services.AddSingleton<ICacheServices,CacheService>();
+builder.Services.AddSingleton<ICategoryService, CategoryService>();
 
 // Add services to the container.
 
@@ -15,6 +25,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
