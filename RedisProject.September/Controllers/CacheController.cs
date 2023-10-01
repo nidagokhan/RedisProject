@@ -22,7 +22,7 @@ namespace RedisProject.September.Controllers
         }
 
         [HttpPost("cache")]
-        public async Task<IActionResult> Post([FromBody] CacheRequestModel model)
+        public async Task<IActionResult> Post([FromBody] CacheRequestDTO model)
         {
             await _cacheServices.SetValueAsync(model.Key, model.Value);
             return Ok();

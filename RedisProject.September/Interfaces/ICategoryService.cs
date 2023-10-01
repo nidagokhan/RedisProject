@@ -4,6 +4,6 @@ namespace RedisProject.September.Interfaces
 {
     public interface ICategoryService
     {
-        List<CategoryModel> GetAllCategory();
+        public Task<List<CategoryDTO>> GetAllCategory();
     }
 }

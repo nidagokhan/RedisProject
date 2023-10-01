@@ -1,33 +1,42 @@
-﻿using RedisProject.September.Interfaces;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
+using RedisProject.September.Interfaces;
 using RedisProject.September.Model;
 using StackExchange.Redis;
+using System.Text.Json.Serialization;
 
 namespace RedisProject.September.Concrete
 {
     public class CategoryService : ICategoryService
     {
-        static List<CategoryModel> categories = new List<CategoryModel>()
+        private readonly IDistributedCache _cache;
+
+        public CategoryService(IDistributedCache cache)
         {
-            new CategoryModel {CategoryID=1,Name="Giyim"},
-            new CategoryModel {CategoryID=2,Name="Kozmetik"},
-            new CategoryModel {CategoryID=3,Name="Ayakkabı"},
-            new CategoryModel {CategoryID=4,Name="Çanta"},
-            new CategoryModel {CategoryID=5,Name="Aksesuar"}
+            _cache = cache;
+        }
+
+        static List<CategoryDTO> categories = new List<CategoryDTO>()
+        {
+            new CategoryDTO {CategoryID=1,Name="Giyim"},
+            new CategoryDTO {CategoryID=2,Name="Kozmetik"},
+            new CategoryDTO {CategoryID=3,Name="Ayakkabı"},
+            new CategoryDTO {CategoryID=4,Name="Çanta"},
+            new CategoryDTO {CategoryID=5,Name="Aksesuar"}
         };
 
-        public ICacheServices CacheServices { get; }
-        public CategoryService(ICacheServices cacheServices)
-        {
-            CacheServices = cacheServices;
-        }
-        public List<CategoryModel> GetAllCategory()
-        {
-            return GetCategoriesFromCache();
-        }
+        public async Task<List<CategoryDTO>> GetAllCategory()
+        {          
+            string result = await _cache.GetStringAsync("Category");
 
-        private List<CategoryModel> GetCategoriesFromCache()
-        {
-            return CacheServices.GetOrAdd("allcategories", () => { return categories; });
+            if (string.IsNullOrEmpty(result))
+            {
+                await _cache.SetStringAsync("Category",JsonConvert.SerializeObject(categories));
+                return categories;
+            }
+            categories=JsonConvert.DeserializeObject<List<CategoryDTO>>(result);
+            return categories;
+
         }
     }
 }
