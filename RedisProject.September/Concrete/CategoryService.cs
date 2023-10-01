@@ -9,34 +9,25 @@ namespace RedisProject.September.Concrete
 {
     public class CategoryService : ICategoryService
     {
-        private readonly IDistributedCache _cache;
-
-        public CategoryService(IDistributedCache cache)
+        private readonly ICacheServices _services;
+        public CategoryService(ICacheServices services)
         {
-            _cache = cache;
+            _services = services;
         }
-
-        static List<CategoryDTO> categories = new List<CategoryDTO>()
+        static List<CategoryDTO> categories => new()
         {
-            new CategoryDTO {CategoryID=1,Name="Giyim"},
-            new CategoryDTO {CategoryID=2,Name="Kozmetik"},
-            new CategoryDTO {CategoryID=3,Name="Ayakkabı"},
-            new CategoryDTO {CategoryID=4,Name="Çanta"},
-            new CategoryDTO {CategoryID=5,Name="Aksesuar"}
+        new CategoryDTO { CategoryID = 1, CategoryName = "Electronic" },
+        new CategoryDTO { CategoryID = 2, CategoryName = "Clothes" }
         };
 
-        public async Task<List<CategoryDTO>> GetAllCategory()
-        {          
-            string result = await _cache.GetStringAsync("Category");
+        public List<CategoryDTO> GetAllCategory()
+        {
+            return GetCategoriesFromCache();
+        }
 
-            if (string.IsNullOrEmpty(result))
-            {
-                await _cache.SetStringAsync("Category",JsonConvert.SerializeObject(categories));
-                return categories;
-            }
-            categories=JsonConvert.DeserializeObject<List<CategoryDTO>>(result);
-            return categories;
-
+        private List<CategoryDTO> GetCategoriesFromCache()
+        {
+            return _services.GetOrAdd("allcategories", () => { return categories; });
         }
     }
 }

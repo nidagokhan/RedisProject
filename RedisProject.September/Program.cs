@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using RedisProject.September.Concrete;
-using RedisProject.September.Data.Context;
 using RedisProject.September.Interfaces;
 using StackExchange.Redis;
 
@@ -11,7 +10,6 @@ var multiplexer = ConnectionMultiplexer.Connect(configuration.GetConnectionStrin
 builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 builder.Services.AddSingleton<ICacheServices, CacheService>();
 builder.Services.AddSingleton<ICategoryService, CategoryService>();
-builder.Services.AddTransient<IProductService, ProductService>();
 
 builder.Services.AddStackExchangeRedisCache(
     options =>
@@ -19,12 +17,6 @@ builder.Services.AddStackExchangeRedisCache(
         string? conneciton = builder.Configuration.GetConnectionString("Redis");
         options.Configuration = conneciton;
     });
-
-builder.Services.AddDbContext<MyDBContext>(options =>
-{
-    string? connection1 = builder.Configuration.GetConnectionString("DB");
-    options.UseSqlServer(connection1);
-});
 
 // Add services to the container.
 
